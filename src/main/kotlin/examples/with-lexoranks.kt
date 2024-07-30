@@ -1,49 +1,43 @@
 package ch.jdc.lexoranks.examples
 
-import ch.jdc.lexoranks.ItemLexicoRank
-import ch.jdc.lexoranks.Sortable
-import ch.jdc.lexoranks.println
-import ch.jdc.lexoranks.sortByRank
+val MIN_RANK = "00000"
+val MAX_RANK = "zzzzz"
+val VALUES = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 fun main() {
-    val items: MutableList<Sortable<String>> = mutableListOf(
-        ItemLexicoRank(name="Item 1", rank="AAA"),
-        ItemLexicoRank(name="Item 2", rank="BBB"),
-        ItemLexicoRank(name="Item 3", rank="CCC"),
-    )
+    val itemA= "aaaaa"
+    val itemB= "bbbbb"
+    val itemC= "ccccc"
 
-    /**
-     * Will print
-     * ItemLexicoRank(name=Item 1, rank=AAA)
-     * ItemLexicoRank(name=Item 2, rank=BBB)
-     * ItemLexicoRank(name=Item 3, rank=CCC)
-     */
-    items.sortByRank().println()
-    println("Now we move Item 1 to the end")
-    items[0].rank = "DDD"
+    println("We have a list of items with a lexico rank.")
+    println("Move Item C between Item A and Item B")
+    println("Compute the new rank for Item C based on the ranks of Item A and Item B should be ${computeRank(itemA, itemB)}")
+    println("Compute the new rank for Item N based on the ranks of Item B and Item C should be ${computeRank(itemB, itemC)}")
 
-    /**
-     * Will print
-     * ItemLexicoRank(name=Item 2, rank=BBB)
-     * ItemLexicoRank(name=Item 3, rank=CCC)
-     * ItemLexicoRank(name=Item 1, rank=DDD)
-     */
-    items.sortByRank().println()
+}
 
-    println("Now we want to add a new item between Item 4 and Item 1.")
+fun base36ToBase10(value: String): Long {
+    return value.fold(0L) { acc, c -> acc * 36 + VALUES.indexOf(c) }
+}
 
-    items.add(ItemLexicoRank(name="Item 4", rank="DAA"))
+fun base10ToBase36(value: Long): String {
+    return if (value == 0L) {
+        MIN_RANK
+    } else {
+        var v = value
+        val sb = StringBuilder()
+        while (v > 0) {
+            sb.append(VALUES[(v % 36).toInt()])
+            v /= 36
+        }
+        sb.reverse().toString()
+    }
+}
 
-    /**
-     * Will print
-     * ItemLexicoRank(name=Item 2, rank=BBB)
-     * ItemLexicoRank(name=Item 3, rank=CCC)
-     * ItemLexicoRank(name=Item 4, rank=DAA)
-     * ItemLexicoRank(name=Item 1, rank=DDD)
-     */
-    items.sortByRank().println()
-
-    println("We update only one item and the list is sorted correctly. This is the power of the LexoRank!")
-
+fun computeRank(rankA: String, rankB: String): String {
+    val valueA = base36ToBase10(rankA)
+    val valueB = base36ToBase10(rankB)
+    val valueC = (valueA + valueB) / 2
+    return base10ToBase36(valueC)
 }
 
